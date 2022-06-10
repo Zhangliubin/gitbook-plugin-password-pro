@@ -43,6 +43,8 @@ npm install gitbook-plugin-password-pro
 
 ### 2. 设置全局参数
 
+本插件有 4 个全局参数:
+
 ```javascript
 "password-pro": {
     "password": "123456",
@@ -52,30 +54,44 @@ npm install gitbook-plugin-password-pro
 },
 ```
 
-此时，打开所有页面都需要使用密码 `123456`。这里的 `tip`, `errprTip`, `reject` 都具有默认值，可以不进行设置。
+`"password"` 表示为所有页面都添加密码。当传入的字符串为空字符串或不传入时表示不加密。
 
 ### 3. 为指定页面设置参数
 
 ```json
 "password-pro": {
-    "password": "123456",
-    "tip": "请输入该页面的访问密码:",
-    "errorTip": "密码错误, 请重新输入:",
-    "reject": "当前页面拒绝访问: 身份验证失败."
-    "README.md": {
-        "password": "111",
-        "tip": "请输入首页密码: ",
-        "errorTip": "密码错误, 请联系管理员",
-        "reject": "无法访问当前页面."
+    "README.md": "",
+    "password": "20220611",
+    "download.md": {
+        "password": "12306",
+        "tip": "下载资源需要验证密码:"
     },
+    "command-line-interface.md": "complex12306",
+    "tip": "请输入当前页面的访问密码:",
+    "errorTip": "密码错误, 请重新输入:"
+}
+```
+
+该语句表示 `README.md` 不加密，全局密码为 `20220611`，`download.md` 密码为 `12306`，`command-line-interface.md` 密码为 `complex12306`。
+
+即格式有两种: 
+
+```json
+"<page>": "<password>"
+```
+
+和
+
+```json
+"<page>": {
+    "password": "<password>",
+    "tip": "<tip>",
+    "errorTip": "<errorTip>",
+    "reject": "<reject>"
 },
 ```
 
-此时，打开 `README.md` 页面需要使用密码 `111`，其他页面都需要使用密码 `123456`。
-
-> 即，指定页面的参数不存在时，则使用全局参数替代。
->
-> 可以不设置全局参数，只设置单独页面参数。
+在第二种格式中，缺少的字段将使用全局参数替代。
 
 ### 4. 在同一次访问中，只要单个页面正确输入了密码。则下次访问该页面也不需要密码。
 

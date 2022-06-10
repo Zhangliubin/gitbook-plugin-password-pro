@@ -2,9 +2,6 @@ require(["gitbook", "jQuery"], function (gitbook, $) {
     // book.js 参数信息
     var inputs;
 
-    // 是否启动该插件
-    var enable;
-
     // 全局参数
     var globalPassword;
     var globalTip;
@@ -19,17 +16,17 @@ require(["gitbook", "jQuery"], function (gitbook, $) {
 
     gitbook.events.bind('start', function (e, config) {
         inputs = config['password-pro'];
-        if (inputs) {
-            // 匹配 global 信息
-            globalTip = inputs.tip;
-            globalErrorTip = inputs.errorTip;
-            globalReject = inputs.reject;
-            if (inputs.password) {
-                globalPassword = md5(inputs.password + S_KEY);
-            }
-            enable = true;
+
+        // 匹配 global 信息
+        globalTip = inputs.tip;
+        globalErrorTip = inputs.errorTip;
+        globalReject = inputs.reject;
+
+        if (inputs.password != null && inputs.password.length != 0) {
+            // 设置了 password 时
+            globalPassword = md5(inputs.password + S_KEY);
         } else {
-            enable = false;
+            globalPassword = null;
         }
     });
 
@@ -37,33 +34,47 @@ require(["gitbook", "jQuery"], function (gitbook, $) {
         // 当前页面路径:
         var id = gitbook.state.file.path;
 
-        if (enable && okPage[id] == null) {
-            var tip;
-            var errorTip;
-            var reject;
-            var password;
+        if (okPage[id] == null) {
+            var tip = globalTip;
+            var errorTip = globalErrorTip;
+            var reject = globalReject;
+            var password = globalPassword;
 
             // 查看当前页面状态
-            if (inputs[id]) {
-                // 该页面有自定义的密码参数信息
-                tip = inputs[id]["tip"] || globalTip;
-                errorTip = inputs[id]["errorTip"] || globalErrorTip;
-                reject = inputs[id]["reject"] || globalReject;
-
-                if (inputs[id]["password"]) {
-                    password = md5(inputs[id]["password"] + S_KEY);
+            if (inputs[id] != null) {
+                if (typeof inputs[id] === "string") {
+                    if (inputs[id].length == 0) {
+                        // 类型为字符串, 但长度为 0, 此时识别为对该页面无密码
+                        password = null;
+                    } else {
+                        password = md5(inputs[id] + S_KEY);
+                    }
                 } else {
-                    password = globalPassword;
+                    // object 类型
+                    if (inputs[id]["tip"] != null) {
+                        tip = inputs[id]["tip"];
+                    }
+
+                    if (inputs[id]["errorTip"] != null) {
+                        errorTip = inputs[id]["errorTip"];
+                    }
+
+                    if (inputs[id]["reject"] != null) {
+                        reject = inputs[id]["reject"];
+                    }
+
+                    if (inputs[id]["password"] != null) {
+                        if (inputs[id]["password"].length == 0) {
+                            // 类型为字符串, 但长度为 0, 此时识别为对该页面无密码
+                            password = null;
+                        } else {
+                            password = md5(inputs[id]["password"] + S_KEY);
+                        }
+                    }
                 }
-            } else {
-                // 该页面没有自定义的密码参数信息
-                tip = globalTip;
-                errorTip = globalErrorTip;
-                reject = globalReject;
-                password = globalPassword;
             }
 
-            if (password) {
+            if (password != null) {
                 // 如果该页面有密码
                 var inputPassword = prompt(tip);
                 if (inputPassword != null) {
